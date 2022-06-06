@@ -14,6 +14,11 @@ export const routes = [
     meta: { title: "冒泡" },
   },
   {
+    path: "/test",
+    component: () => import("./views/Test/index.vue"),
+    meta: { title: "test" },
+  },
+  {
     path: "/:path(.*)",
     component: NotFound,
   },
