@@ -1,5 +1,7 @@
 <template>
-  <router-view />
+  <div class="viewCon p-4">
+    <router-view />
+  </div>
 </template>
 
 <script setup>
