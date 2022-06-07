@@ -58,6 +58,7 @@ export default {
     background: #0984e3;
     color: #fff;
     text-align: center;
+    transition: 1s;
   }
 }
 </style>
