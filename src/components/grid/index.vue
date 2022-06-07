@@ -1,22 +1,18 @@
 <script lang="jsx">
-import { ref, watch } from "vue"
+import { ref, watch, watchEffect } from "vue"
 import { height } from "tailwindcss/defaultTheme"
 export default {
   props: {
     arr: {
       type: Array,
-      default: () => [1]
+      default: () => [],
     },
   },
   setup(props) {
     console.log("grid props", props)
-    let min = 0
-    let max = 0
-
-    function setM() {
-      min = Math.min(...props.arr)
-      max = Math.max(...props.arr)
-    }
+    let max
+    let barWidth = 30
+    let gap = 10
 
     function getHeight(val) {
       const minH = 30
@@ -25,39 +21,42 @@ export default {
       return valH < minH ? minH : valH
     }
 
-    watch(
-      () => props.arr,
-      (val) => {
-        setM()
-        console.log(val)
-      }
-    )
-    return () => (
-      <div class="grid">
-        {props.arr.map((item) => {
-          const height = parseInt(getHeight(item))
-          console.log(height)
-          return <div style={{height: `${height}px`}} class="item">{item}</div>
-        })}
-      </div>
-    )
+    return () => {
+      max = Math.max(...props.arr)
+      console.log({ max, arr: props.arr })
+
+      return (
+        <div class="gridCon">
+          {props.arr.map((item, i) => {
+            const height = parseInt(getHeight(item))
+            const styleObj = {
+              width: `${barWidth}px`,
+              height: `${height}px`,
+              left: `${(barWidth + gap) * i}px`,
+            }
+            return (
+              <div style={styleObj} class="item">
+                {item}
+              </div>
+            )
+          })}
+        </div>
+      )
+    }
   },
 }
 </script>
 
 <style lang="less" scoped>
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 30px);
-  grid-template-rows: 400px;
-  justify-items: center;
-  align-items: end;
-  gap: 4px;
+.gridCon {
   border: 1px solid #000;
+  position: relative;
+  height: 400px;
   .item {
-    background: red;
-    min-width: 20px;
-    width: 20px;
+    position: absolute;
+    bottom: 0;
+    background: #0984e3;
+    color: #fff;
     text-align: center;
   }
 }
