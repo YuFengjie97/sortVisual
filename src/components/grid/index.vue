@@ -106,13 +106,11 @@ export default {
 
             itemMin = item2
             item5 = arrWrap2.value.find((item) => item.id === itemMin.id)
-
             item5.bg = yellow
           }
 
           await sleep(transitionTime * 1000)
-
-          item4.bg = blue
+          item4.bg = item4.id === itemMin.id ? yellow : blue
         }
 
         swap(arrWrap1.value, item1, itemMin, "id")
@@ -120,6 +118,7 @@ export default {
         swap(arrWrap2.value, item3, item5, "left")
 
         item3.bg = blue
+        item5.bg = blue
       }
       // console.log(arrWrap1.value.map(item=>item.val));
       // console.log(arrWrap2.value.sort((a,b)=>a.left-b.left));
