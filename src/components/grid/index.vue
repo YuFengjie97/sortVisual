@@ -53,6 +53,18 @@ export default {
       item2[key] = temp
     }
 
+    function handleReset () {
+      arrWrap1.value = props.arr.map((item, i) => {
+        return {
+          id: i,
+          val: item,
+        }
+      })
+      arrWrap2.value.forEach((item,i)=>{
+        item.left = (barWidth + gap) * i
+      })
+    }
+
     async function handleBubbleSort() {
       let len = arrWrap1.value.length
       for (let i = 0; i < len - 1; i++) {
@@ -147,6 +159,12 @@ export default {
           </div>
           <button
             class="rounded bg-gray-900 text-white p-1 my-2 mr-2"
+            onClick={handleReset}
+          >
+            重制排序
+          </button>
+          <button
+            class="rounded bg-gray-900 text-white p-1 my-2 mr-2"
             onClick={handleBubbleSort}
           >
             冒泡排序
@@ -166,7 +184,7 @@ export default {
 
 <style lang="less" scoped>
 .gridCon {
-  border: 1px solid #000;
+  // border: 1px solid #000;
   position: relative;
   height: 400px;
   .item {
