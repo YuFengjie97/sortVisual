@@ -1,8 +1,43 @@
-<script lang="jsx">
-import { ref, watch, watchEffect } from "vue"
-import { height } from "tailwindcss/defaultTheme"
+<template>
+  <div class="gridCon" :style="`--transitionTime: ${transitionTime}s`">
+    <div
+      class="item"
+      v-for="item in arrWrap2"
+      :key="item.id"
+      :style="`height:${item.height}px;left: ${item.left}px;width:${barWidth}px;background:${item.bg}`"
+    >
+      {{ item.val }}
+    </div>
+  </div>
+  <button
+    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
+    @click="handleReset"
+  >
+    重制排序
+  </button>
+  <button
+    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
+    @click="handleBubbleSort"
+  >
+    冒泡排序
+  </button>
+  <button
+    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
+    @click="handleSelectSort"
+  >
+    选择排序
+  </button>
+  <button
+    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
+    @click="handleInsertSort"
+  >
+    插入排序
+  </button>
+</template>
+<script>
+import { computed, ref, watchEffect } from 'vue'
 
-import { sleep } from "@/util/index"
+import { sleep } from '@/util/index'
 
 export default {
   props: {
@@ -17,76 +52,86 @@ export default {
     let gap = 10
     let minH = 30
     let maxH = 400
-    let arrWrap1 = ref([]) // {id,val} 排序的数组
-    let arrWrap2 = ref([]) // {id,val,height,left} // 通过id与arrWrap1关联,索引顺序不变,left在变
-    const transitionTime = 0.1 // 秒
+    let arrWrap1 = [] // {id,val} 排序的数组
+    let idMap = ref({}) // id-->el
+    let arrWrap2 = computed(() => {
+      return Object.values(idMap.value).map((item) => item)
+    }) // {id,val,height,left} // 通过id与arrWrap1关联,索引顺序不变,left在变
+    const transitionTime = ref(0.3) // 秒
 
-    const red = "#ff7675"
-    const blue = "#0984e3"
-    const yellow = "#fdcb6e"
+    const active = '#ff7675'
+    const defaultC = '#0984e3'
+    const mark = '#fdcb6e'
+    const done = '#6c5ce7'
 
     watchEffect(() => {
       if (props.arr.length === 0) return
       max = Math.max(...props.arr.slice(0))
-      arrWrap1.value = props.arr.map((item, i) => {
+      arrWrap1 = props.arr.map((item, i) => {
         return {
           id: i,
           val: item,
         }
       })
-      arrWrap2.value = props.arr.map((item, i) => {
+      props.arr.forEach((item, i) => {
         const valH = (maxH / max) * item
-
-        return {
+        const el = {
           id: i,
           val: item,
           height: valH < minH ? minH : parseInt(valH),
           left: (barWidth + gap) * i,
+          bg: defaultC
         }
+        idMap.value[i] = el
       })
     })
 
-    function swap(arr, item1, item2, key) {
+    function swap(item1, item2, key) {
       if (item1 === item2) return
       let temp = item1[key]
       item1[key] = item2[key]
       item2[key] = temp
     }
 
-    function handleReset () {
-      arrWrap1.value = props.arr.map((item, i) => {
-        return {
-          id: i,
-          val: item,
-        }
-      })
-      arrWrap2.value.forEach((item,i)=>{
-        item.left = (barWidth + gap) * i
-      })
+    function handleReset() {
+      // arrWrap1 = props.arr.map((item, i) => {
+      //   return {
+      //     id: i,
+      //     val: item,
+      //   }
+      // })
+      // arrWrap2.value = props.arr.map((item, i) => {
+      //   const valH = (maxH / max) * item
+      //   const el = {
+      //     id: i,
+      //     val: item,
+      //     height: valH < minH ? minH : parseInt(valH),
+      //     left: (barWidth + gap) * i,
+      //   }
+      //   idMap[i] = el
+      //   return el
+      // })
     }
 
     async function handleBubbleSort() {
-      let len = arrWrap1.value.length
+      let len = arrWrap1.length
+      let item1, item2, item3, item4
       for (let i = 0; i < len - 1; i++) {
         for (let j = 0; j < len - 1 - i; j++) {
-          let item1 = arrWrap1.value[j]
-          let item2 = arrWrap1.value[j + 1]
-
-          let item3 = arrWrap2.value.find((item) => item.id === item1.id)
-          let item4 = arrWrap2.value.find((item) => item.id === item2.id)
-
-          item3.bg = red
-          item4.bg = red
-
+          item1 = arrWrap1[j]
+          item2 = arrWrap1[j + 1]
+          item3 = idMap.value[item1.id]
+          item4 = idMap.value[item2.id]
+          item3.bg = active
+          item4.bg = active
           if (item1.val > item2.val) {
-            swap(arrWrap1.value, item1, item2, "id")
-            swap(arrWrap1.value, item1, item2, "val")
-            swap(arrWrap2.value, item3, item4, "left")
+            swap(item1, item2, 'id')
+            swap(item1, item2, 'val')
+            swap(item3, item4, 'left')
           }
-
-          await sleep(transitionTime * 1000)
-          item3.bg = blue
-          item4.bg = blue
+          await sleep(transitionTime.value * 1000)
+          item3.bg = defaultC
+          item4.bg = defaultC
         }
       }
     }
@@ -97,86 +142,65 @@ export default {
      * itemMin-->item5
      */
     async function handleSelectSort() {
-      let len = arrWrap1.value.length
+      let len = arrWrap1.length
+      let item1, item2, item3, item4, item5, itemMin
       for (let i = 0; i < len - 1; i++) {
-        let item1 = arrWrap1.value[i]
-        let itemMin = item1
-
-        let item3 = arrWrap2.value.find((item) => item.id === item1.id)
-        item3.bg = red
-
-        let item4
-        let item5 = arrWrap2.value.find((item) => item.id === itemMin.id)
-
+        item1 = arrWrap1[i]
+        itemMin = item1
+        item3 = idMap.value[item1.id]
+        item3.bg = mark
+        item5 = idMap.value[itemMin.id]
         for (let j = i + 1; j < len; j++) {
-          let item2 = arrWrap1.value[j]
-          item4 = arrWrap2.value.find((item) => item.id === item2.id)
-          item4.bg = item4.id === itemMin.id ? yellow : red
-
+          item2 = arrWrap1[j]
+          item4 = idMap.value[item2.id]
+          item4.bg = item4.id === itemMin.id ? mark : active
           if (item2.val < itemMin.val) {
-            item5.bg = blue
-
+            item5.bg = defaultC
             itemMin = item2
-            item5 = arrWrap2.value.find((item) => item.id === itemMin.id)
-            item5.bg = yellow
+            item5 = idMap.value[itemMin.id]
+            item5.bg = mark
           }
-
-          await sleep(transitionTime * 1000)
-          item4.bg = item4.id === itemMin.id ? yellow : blue
+          await sleep(transitionTime.value * 1000)
+          item4.bg = item4.id === itemMin.id ? mark : defaultC
         }
-
-        swap(arrWrap1.value, item1, itemMin, "id")
-        swap(arrWrap1.value, item1, itemMin, "val")
-        swap(arrWrap2.value, item3, item5, "left")
-
-        item3.bg = blue
-        item5.bg = blue
+        swap(item1, itemMin, 'id')
+        swap(item1, itemMin, 'val')
+        swap(item3, item5, 'left')
+        item3.bg = defaultC
+        item5.bg = defaultC
       }
-      // console.log(arrWrap1.value.map(item=>item.val));
-      // console.log(arrWrap2.value.sort((a,b)=>a.left-b.left));
     }
 
-    return () => {
-      return (
-        <>
-          <div
-            class="gridCon"
-            style={{ "--transitionTime": `${transitionTime}s` }}
-          >
-            {arrWrap2.value.map((item, i) => {
-              const styleObj = {
-                width: `${barWidth}px`,
-                height: `${item.height}px`,
-                left: `${item.left}px`,
-                background: item.bg,
-              }
-              return (
-                <div style={styleObj} class="item">
-                  {item.val}
-                </div>
-              )
-            })}
-          </div>
-          <button
-            class="rounded bg-gray-900 text-white p-1 my-2 mr-2"
-            onClick={handleReset}
-          >
-            重制排序
-          </button>
-          <button
-            class="rounded bg-gray-900 text-white p-1 my-2 mr-2"
-            onClick={handleBubbleSort}
-          >
-            冒泡排序
-          </button>
-          <button
-            class="rounded bg-gray-900 text-white p-1 my-2 mr-2"
-            onClick={handleSelectSort}
-          >
-            选择排序
-          </button>
-        </>
-      )
+    async function handleInsertSort() {
+      let item1, item2, item3, item4
+      for (let i = 1; i < arrWrap1.length; i++) {
+        for (let j = i; j > 0; j--) {
+          item1 = arrWrap1[j]
+          item2 = arrWrap1[j - 1]
+
+          item3 = idMap.value[item1.id]
+          item4 = idMap.value[item2.id]
+          item3.bg = active
+          item4.bg = active
+          if (item1.val < item2.val) {
+            swap(item1, item2, 'val')
+            swap(item1, item2, 'id')
+            swap(item3, item4, 'left')
+          }
+          await sleep(transitionTime.value * 1000)
+          item3.bg = defaultC
+          item4.bg = defaultC
+        }
+      }
+    }
+    return {
+      arrWrap2,
+      barWidth,
+      transitionTime,
+      handleReset,
+      handleSelectSort,
+      handleBubbleSort,
+      handleInsertSort,
     }
   },
 }
@@ -184,7 +208,6 @@ export default {
 
 <style lang="less" scoped>
 .gridCon {
-  // border: 1px solid #000;
   position: relative;
   height: 400px;
   .item {
