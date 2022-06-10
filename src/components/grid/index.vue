@@ -186,10 +186,14 @@ export default {
             swap(item1, item2, 'val')
             swap(item1, item2, 'id')
             swap(item3, item4, 'left')
+            await sleep(transitionTime.value * 1000)
+            item3.bg = defaultC
+            item4.bg = defaultC
+          }else{
+            item3.bg = defaultC
+            item4.bg = defaultC
+            continue
           }
-          await sleep(transitionTime.value * 1000)
-          item3.bg = defaultC
-          item4.bg = defaultC
         }
       }
     }

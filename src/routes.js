@@ -11,7 +11,7 @@ export const routes = [
   {
     path: "/bubble",
     component: () => import("./views/BubbleSort/index.vue"),
-    meta: { title: "冒泡" },
+    meta: { title: "排序可视化" },
   },
   {
     path: "/test",
