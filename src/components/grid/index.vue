@@ -9,30 +9,13 @@
       {{ item.val }}
     </div>
   </div>
-  <button
-    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
-    @click="handleReset"
-  >
-    重制排序
+  <button @click="handlePause">
+    {{ isPause ? '继续' : '暂停' }}
   </button>
-  <button
-    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
-    @click="handleBubbleSort"
-  >
-    冒泡排序
-  </button>
-  <button
-    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
-    @click="handleSelectSort"
-  >
-    选择排序
-  </button>
-  <button
-    class="my-2 mr-2 rounded bg-gray-900 p-1 text-white"
-    @click="handleInsertSort"
-  >
-    插入排序
-  </button>
+  <button @click="handleReset">重制排序</button>
+  <button @click="handleBubbleSort">冒泡排序</button>
+  <button @click="handleSelectSort">选择排序</button>
+  <button @click="handleInsertSort">插入排序</button>
 </template>
 <script>
 import { computed, ref, watchEffect } from 'vue'
@@ -48,25 +31,28 @@ export default {
   },
   setup(props) {
     let max
-    let barWidth = 30
-    let gap = 10
-    let minH = 30
-    let maxH = 400
-    let arrWrap1 = [] // {id,val} 排序的数组
-    let idMap = ref({}) // id-->el
-    let arrWrap2 = computed(() => {
-      return Object.values(idMap.value).map((item) => item)
-    }) // {id,val,height,left} // 通过id与arrWrap1关联,索引顺序不变,left在变
-    const transitionTime = ref(0.3) // 秒
-
+    const barWidth = 30
+    const gap = 10
+    const minH = 30
+    const maxH = 400
+    const transitionTime = ref(0.1) // 秒
     const active = '#ff7675'
     const defaultC = '#0984e3'
     const mark = '#fdcb6e'
     const done = '#6c5ce7'
 
+    let arrWrap1 = [] // {id,val} 排序的数组
+    let idMap = ref({}) // id-->el
+    let arrWrap2 = computed(() => {
+      return Object.values(idMap.value).map((item) => item)
+    }) // {id,val,height,left} // 通过id与arrWrap1关联,索引顺序不变,left在变
     watchEffect(() => {
       if (props.arr.length === 0) return
       max = Math.max(...props.arr.slice(0))
+      initDataByProp()
+    })
+
+    function initDataByProp() {
       arrWrap1 = props.arr.map((item, i) => {
         return {
           id: i,
@@ -80,11 +66,28 @@ export default {
           val: item,
           height: valH < minH ? minH : parseInt(valH),
           left: (barWidth + gap) * i,
-          bg: defaultC
+          bg: defaultC,
         }
         idMap.value[i] = el
       })
-    })
+    }
+
+    // 暂停排序
+    let isPause = ref(false)
+    function pause() {
+      return new Promise((resolve, reject) => {
+        setInterval(() => {
+          if (!isPause.value) resolve()
+        }, 1)
+      })
+    }
+    function handlePause() {
+      isPause.value = !isPause.value
+    }
+
+    // 结束排序
+    let isOver = true
+
 
     function swap(item1, item2, key) {
       if (item1 === item2) return
@@ -94,30 +97,18 @@ export default {
     }
 
     function handleReset() {
-      // arrWrap1 = props.arr.map((item, i) => {
-      //   return {
-      //     id: i,
-      //     val: item,
-      //   }
-      // })
-      // arrWrap2.value = props.arr.map((item, i) => {
-      //   const valH = (maxH / max) * item
-      //   const el = {
-      //     id: i,
-      //     val: item,
-      //     height: valH < minH ? minH : parseInt(valH),
-      //     left: (barWidth + gap) * i,
-      //   }
-      //   idMap[i] = el
-      //   return el
-      // })
+      isOver = true
+      initDataByProp()
     }
 
     async function handleBubbleSort() {
+      isOver = false
       let len = arrWrap1.length
       let item1, item2, item3, item4
       for (let i = 0; i < len - 1; i++) {
         for (let j = 0; j < len - 1 - i; j++) {
+          await pause()
+          if(isOver) return
           item1 = arrWrap1[j]
           item2 = arrWrap1[j + 1]
           item3 = idMap.value[item1.id]
@@ -142,6 +133,7 @@ export default {
      * itemMin-->item5
      */
     async function handleSelectSort() {
+      isOver = false
       let len = arrWrap1.length
       let item1, item2, item3, item4, item5, itemMin
       for (let i = 0; i < len - 1; i++) {
@@ -151,6 +143,8 @@ export default {
         item3.bg = mark
         item5 = idMap.value[itemMin.id]
         for (let j = i + 1; j < len; j++) {
+          await pause()
+          if(isOver) return
           item2 = arrWrap1[j]
           item4 = idMap.value[item2.id]
           item4.bg = item4.id === itemMin.id ? mark : active
@@ -172,9 +166,12 @@ export default {
     }
 
     async function handleInsertSort() {
+      isOver = false
       let item1, item2, item3, item4
       for (let i = 1; i < arrWrap1.length; i++) {
         for (let j = i; j > 0; j--) {
+          await pause()
+          if(isOver) return
           item1 = arrWrap1[j]
           item2 = arrWrap1[j - 1]
 
@@ -189,7 +186,7 @@ export default {
             await sleep(transitionTime.value * 1000)
             item3.bg = defaultC
             item4.bg = defaultC
-          }else{
+          } else {
             item3.bg = defaultC
             item4.bg = defaultC
             continue
@@ -198,6 +195,7 @@ export default {
       }
     }
     return {
+      isPause,
       arrWrap2,
       barWidth,
       transitionTime,
@@ -205,6 +203,7 @@ export default {
       handleSelectSort,
       handleBubbleSort,
       handleInsertSort,
+      handlePause,
     }
   },
 }
@@ -220,8 +219,10 @@ export default {
     background: #0984e3;
     color: #fff;
     text-align: center;
-    transition: left var(--transitionTime) ease-in;
-    // transition: left 0.3s;
+    transition: left var(--transitionTime) ease-in, color 0.3s;
   }
+}
+button {
+  @apply my-2 mr-2 rounded bg-gray-900 p-1 text-white;
 }
 </style>
