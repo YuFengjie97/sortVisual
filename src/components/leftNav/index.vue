@@ -4,7 +4,7 @@
       :to="item.path"
       v-for="(item, i) in navList"
       :key="i"
-      class="p-2 m-1 rounded-md bg-green-800 hover:bg-green-400 transition-background duration-300 text-white text-center"
+      class="p-2 m-1 rounded-md bg-black transition-background duration-300 text-white text-center"
     >
       {{ item.meta.title }}
     </router-link>

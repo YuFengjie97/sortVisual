@@ -43,7 +43,7 @@ watchEffect(() => {
 handleCreateArr()
 
 function handleCreateArr() {
-  inputStr.value = createRandomArr(20).join(",")
+  inputStr.value = createRandomArr(10).join(",")
 }
 </script>
 
