@@ -14,6 +14,7 @@ export default defineConfig({
     open: true,
   },
   build: {
-    outDir: 'docs'
+    outDir: 'docs',
+    assetsDir: './SortingAlgorithm/assets'
   }
 })
