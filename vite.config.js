@@ -4,6 +4,7 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import { resolve } from 'path'
 
 export default defineConfig({
+  base: 'https://yufengjie97.github.io/sortVisual/',
   plugins: [vue(), vueJsx()],
   resolve: {
     alias: {
@@ -14,7 +15,6 @@ export default defineConfig({
     open: true,
   },
   build: {
-    outDir: 'docs',
-    assetsDir: './assets'
+    outDir: './docs'
   }
 })
