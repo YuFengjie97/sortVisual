@@ -15,7 +15,7 @@
 import { ref } from "vue";
 import { routes } from "../../routes";
 
-const navList = ref(routes.slice(1, -1))
+const navList = ref(routes.slice(0, -1))
 
 </script>
 
