@@ -28,8 +28,5 @@ git push -f
 
 # 如果你要部署在 https://<USERNAME>.github.io/<REPO>
 # git push -f git@github.com:<USERNAME>/<REPO>.git main:gh-pages
-<<<<<<< HEAD
-=======
 # git push -f git@github.com:YuFengjie97/sortVisual.git main:gh-pages
->>>>>>> 1a9e1c9 (sh)
 cd /
