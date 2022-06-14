@@ -5,7 +5,7 @@
       乱序数组:
       <input
         id="inputStr"
-        class="w-2/5"
+        class="w-8/12"
         type="text"
         placeholder="逗号隔开"
         v-model="inputStr"
@@ -43,7 +43,7 @@ watchEffect(() => {
 handleCreateArr()
 
 function handleCreateArr() {
-  inputStr.value = createRandomArr(10).join(",")
+  inputStr.value = createRandomArr(30).join(",")
 }
 </script>
 
